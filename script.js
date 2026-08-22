@@ -3,17 +3,18 @@
 // ================================
 
 const searchInput = document.querySelector(".search-box input");
-const tableRows = document.querySelectorAll("tbody tr");
 
 searchInput.addEventListener("input", function () {
 
     const searchText = searchInput.value.toLowerCase();
 
-    tableRows.forEach(function (row) {
+    const rows = document.querySelectorAll("tbody tr");
 
-        const rowText = row.textContent.toLowerCase();
+    rows.forEach(function (row) {
 
-        if (rowText.includes(searchText)) {
+        const bookDetails = row.textContent.toLowerCase();
+
+        if (bookDetails.includes(searchText)) {
             row.style.display = "";
         } else {
             row.style.display = "none";
@@ -28,162 +29,162 @@ searchInput.addEventListener("input", function () {
 // ISSUE BOOK
 // ================================
 
-const issueButtons = document.querySelectorAll(".issue-btn");
+function issueBook(button) {
 
-issueButtons.forEach(function (button) {
+    const row = button.closest("tr");
 
-    button.addEventListener("click", function () {
+    const status = row.querySelector(".available, .issued");
 
-        const row = button.closest("tr");
-        const status = row.querySelector(".available, .issued");
+    if (status.classList.contains("available")) {
 
-        if (status.classList.contains("available")) {
+        status.textContent = "Issued";
 
-            status.textContent = "Issued";
-            status.classList.remove("available");
-            status.classList.add("issued");
+        status.classList.remove("available");
+        status.classList.add("issued");
 
-            button.textContent = "Issued";
-            button.disabled = true;
+        button.textContent = "Issued";
+        button.disabled = true;
 
-            alert("Book issued successfully!");
+        alert("Book issued successfully!");
 
-        } else {
+    } else {
 
-            alert("Book is already issued.");
+        alert("Book is already issued.");
 
-        }
+    }
 
-    });
-
-});
+}
 
 
 // ================================
 // RETURN BOOK
 // ================================
 
-const returnButtons = document.querySelectorAll(".return-btn");
+function returnBook(button) {
 
-returnButtons.forEach(function (button) {
+    const row = button.closest("tr");
 
-    button.addEventListener("click", function () {
+    const status = row.querySelector(".available, .issued");
 
-        const row = button.closest("tr");
-        const status = row.querySelector(".available, .issued");
+    const issueButton = row.querySelector(".issue-btn");
 
-        if (status.classList.contains("issued")) {
+    if (status.classList.contains("issued")) {
 
-            status.textContent = "Available";
-            status.classList.remove("issued");
-            status.classList.add("available");
+        status.textContent = "Available";
 
-            const issueButton = row.querySelector(".issue-btn");
+        status.classList.remove("issued");
+        status.classList.add("available");
 
-            if (issueButton) {
-                issueButton.textContent = "Issue";
-                issueButton.disabled = false;
-            }
+        issueButton.textContent = "Issue";
+        issueButton.disabled = false;
 
-            alert("Book returned successfully!");
+        alert("Book returned successfully!");
 
-        } else {
+    } else {
 
-            alert("Book is already available.");
+        alert("Book is already available.");
 
-        }
+    }
 
-    });
-
-});
+}
 
 
 // ================================
-// ADD BOOK
+// ISSUE & RETURN BUTTONS
+// ================================
+
+function addButtonEvents() {
+
+    const issueButtons = document.querySelectorAll(".issue-btn");
+    const returnButtons = document.querySelectorAll(".return-btn");
+
+
+    issueButtons.forEach(function (button) {
+
+        button.onclick = function () {
+            issueBook(button);
+        };
+
+    });
+
+
+    returnButtons.forEach(function (button) {
+
+        button.onclick = function () {
+            returnBook(button);
+        };
+
+    });
+
+}
+
+
+// Run button events
+addButtonEvents();
+
+
+// ================================
+// ADD NEW BOOK
 // ================================
 
 const addButton = document.querySelector(".add-btn");
 
 addButton.addEventListener("click", function () {
 
-    const title = prompt("Enter book title:");
-    const author = prompt("Enter author name:");
+    const bookName = prompt("Enter book name:");
 
-    if (title && author) {
-
-        const tableBody = document.querySelector("tbody");
-
-        const newRow = document.createElement("tr");
-
-        newRow.innerHTML = `
-            <td>${title}</td>
-            <td>${author}</td>
-            <td>
-                <span class="available">Available</span>
-            </td>
-            <td>
-                <button class="issue-btn">Issue</button>
-                <button class="return-btn">Return</button>
-            </td>
-        `;
-
-        tableBody.appendChild(newRow);
-
-        alert("Book added successfully!");
-
-        // Add functionality to new buttons
-        addBookButtonEvents(newRow);
+    if (!bookName) {
+        return;
     }
 
+
+    const authorName = prompt("Enter author name:");
+
+    if (!authorName) {
+        return;
+    }
+
+
+    const tableBody = document.querySelector("tbody");
+
+
+    const newRow = document.createElement("tr");
+
+
+    newRow.innerHTML = `
+
+        <td>${bookName}</td>
+
+        <td>${authorName}</td>
+
+        <td>
+            <span class="available">
+                Available
+            </span>
+        </td>
+
+        <td>
+
+            <button class="issue-btn">
+                Issue
+            </button>
+
+            <button class="return-btn">
+                Return
+            </button>
+
+        </td>
+
+    `;
+
+
+    tableBody.appendChild(newRow);
+
+
+    // Add events to new buttons
+    addButtonEvents();
+
+
+    alert("Book added successfully!");
+
 });
-
-
-// ================================
-// EVENTS FOR NEW BOOK
-// ================================
-
-function addBookButtonEvents(row) {
-
-    const issueButton = row.querySelector(".issue-btn");
-    const returnButton = row.querySelector(".return-btn");
-
-    issueButton.addEventListener("click", function () {
-
-        const status = row.querySelector(".available, .issued");
-
-        if (status.classList.contains("available")) {
-
-            status.textContent = "Issued";
-            status.classList.remove("available");
-            status.classList.add("issued");
-
-            issueButton.textContent = "Issued";
-            issueButton.disabled = true;
-
-            alert("Book issued successfully!");
-
-        }
-
-    });
-
-
-    returnButton.addEventListener("click", function () {
-
-        const status = row.querySelector(".available, .issued");
-
-        if (status.classList.contains("issued")) {
-
-            status.textContent = "Available";
-            status.classList.remove("issued");
-            status.classList.add("available");
-
-            issueButton.textContent = "Issue";
-            issueButton.disabled = false;
-
-            alert("Book returned successfully!");
-
-        }
-
-    });
-
-}
