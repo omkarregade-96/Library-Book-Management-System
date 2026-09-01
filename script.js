@@ -1,155 +1,155 @@
-// ================================
+// ========================================
 // SEARCH BOOKS
-// ================================
+// ========================================
 
 const searchInput = document.querySelector(".search-box input");
+const tableBody = document.querySelector("tbody");
 
 searchInput.addEventListener("input", function () {
 
-    const searchText = searchInput.value.toLowerCase();
-
-    const rows = document.querySelectorAll("tbody tr");
+    const searchText = this.value.toLowerCase().trim();
+    const rows = tableBody.querySelectorAll("tr");
 
     rows.forEach(function (row) {
 
         const bookDetails = row.textContent.toLowerCase();
 
-        if (bookDetails.includes(searchText)) {
-            row.style.display = "";
-        } else {
-            row.style.display = "none";
-        }
+        row.style.display =
+            bookDetails.includes(searchText) ? "" : "none";
 
     });
 
 });
 
 
-// ================================
+// ========================================
+// GET BOOK STATUS
+// ========================================
+
+function getBookStatus(row) {
+    return row.querySelector(".available, .issued");
+}
+
+
+// ========================================
 // ISSUE BOOK
-// ================================
+// ========================================
 
 function issueBook(button) {
 
     const row = button.closest("tr");
+    const status = getBookStatus(row);
 
-    const status = row.querySelector(".available, .issued");
-
-    if (status.classList.contains("available")) {
-
-        status.textContent = "Issued";
-
-        status.classList.remove("available");
-        status.classList.add("issued");
-
-        button.textContent = "Issued";
-        button.disabled = true;
-
-        alert("Book issued successfully!");
-
-    } else {
-
-        alert("Book is already issued.");
-
+    if (status.classList.contains("issued")) {
+        showMessage("Book is already issued.");
+        return;
     }
+
+    status.textContent = "Issued";
+
+    status.classList.remove("available");
+    status.classList.add("issued");
+
+    button.textContent = "Issued";
+    button.disabled = true;
+
+    showMessage("Book issued successfully!");
 
 }
 
 
-// ================================
+// ========================================
 // RETURN BOOK
-// ================================
+// ========================================
 
 function returnBook(button) {
 
     const row = button.closest("tr");
-
-    const status = row.querySelector(".available, .issued");
+    const status = getBookStatus(row);
 
     const issueButton = row.querySelector(".issue-btn");
 
-    if (status.classList.contains("issued")) {
-
-        status.textContent = "Available";
-
-        status.classList.remove("issued");
-        status.classList.add("available");
-
-        issueButton.textContent = "Issue";
-        issueButton.disabled = false;
-
-        alert("Book returned successfully!");
-
-    } else {
-
-        alert("Book is already available.");
-
+    if (status.classList.contains("available")) {
+        showMessage("Book is already available.");
+        return;
     }
 
-}
+    status.textContent = "Available";
 
+    status.classList.remove("issued");
+    status.classList.add("available");
 
-// ================================
-// ISSUE & RETURN BUTTONS
-// ================================
+    issueButton.textContent = "Issue";
+    issueButton.disabled = false;
 
-function addButtonEvents() {
-
-    const issueButtons = document.querySelectorAll(".issue-btn");
-    const returnButtons = document.querySelectorAll(".return-btn");
-
-
-    issueButtons.forEach(function (button) {
-
-        button.onclick = function () {
-            issueBook(button);
-        };
-
-    });
-
-
-    returnButtons.forEach(function (button) {
-
-        button.onclick = function () {
-            returnBook(button);
-        };
-
-    });
+    showMessage("Book returned successfully!");
 
 }
 
 
-// Run button events
-addButtonEvents();
+// ========================================
+// MESSAGE FUNCTION
+// ========================================
+
+function showMessage(message) {
+    alert(message);
+}
 
 
-// ================================
+// ========================================
 // ADD NEW BOOK
-// ================================
+// ========================================
 
 const addButton = document.querySelector(".add-btn");
 
-addButton.addEventListener("click", function () {
+addButton.addEventListener("click", addNewBook);
 
-    const bookName = prompt("Enter book name:");
+
+function addNewBook() {
+
+    const bookName = getBookInput("Enter book name:");
 
     if (!bookName) {
         return;
     }
 
-
-    const authorName = prompt("Enter author name:");
+    const authorName = getBookInput("Enter author name:");
 
     if (!authorName) {
         return;
     }
 
+    createBookRow(bookName, authorName);
 
-    const tableBody = document.querySelector("tbody");
+    showMessage("Book added successfully!");
 
+}
+
+
+// ========================================
+// GET INPUT
+// ========================================
+
+function getBookInput(message) {
+
+    const value = prompt(message);
+
+    if (!value || value.trim() === "") {
+        return null;
+    }
+
+    return value.trim();
+
+}
+
+
+// ========================================
+// CREATE BOOK ROW
+// ========================================
+
+function createBookRow(bookName, authorName) {
 
     const newRow = document.createElement("tr");
-
 
     newRow.innerHTML = `
 
@@ -177,14 +177,29 @@ addButton.addEventListener("click", function () {
 
     `;
 
-
     tableBody.appendChild(newRow);
 
-
-    // Add events to new buttons
-    addButtonEvents();
+}
 
 
-    alert("Book added successfully!");
+// ========================================
+// BUTTON EVENT DELEGATION
+// ========================================
+
+tableBody.addEventListener("click", function (event) {
+
+    const clickedButton = event.target;
+
+    if (clickedButton.classList.contains("issue-btn")) {
+
+        issueBook(clickedButton);
+
+    }
+
+    if (clickedButton.classList.contains("return-btn")) {
+
+        returnBook(clickedButton);
+
+    }
 
 });
